@@ -1,19 +1,32 @@
-import { useState, useCallback } from 'react';
-import { login as apiLogin } from '@/lib/api';
-import { clearTokens, isAuthenticated } from '@/lib/auth-store';
+import { useState, useEffect, useCallback } from 'react';
+import type { Session } from '@supabase/supabase-js';
+import { supabase } from '@/lib/supabase';
 
 export function useAuth() {
-  const [authenticated, setAuthenticated] = useState(isAuthenticated());
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    await apiLogin(email, password);
-    setAuthenticated(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
   }, []);
 
-  const signOut = useCallback(() => {
-    clearTokens();
-    setAuthenticated(false);
+  const signOut = useCallback(async () => {
+    await supabase.auth.signOut();
   }, []);
 
-  return { authenticated, signIn, signOut };
+  return { session, loading, signIn, signOut };
 }
