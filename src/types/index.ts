@@ -1,3 +1,29 @@
+export interface User {
+  id: string;
+  email: string;
+  full_name: string;
+  role: 'admin' | 'member';
+  created_at: string;
+}
+
+export interface CompanyFull {
+  id: string;
+  name: string;
+  slug: string;
+  plan: 'free' | 'pro' | 'enterprise';
+  phone_number: string | null;
+  company_number: string | null;
+  created_at: string;
+}
+
+export interface ApiKey {
+  id: string;
+  label: string | null;
+  last_used_at: string | null;
+  is_active: boolean;
+  created_at: string;
+}
+
 export interface ConversationSummary {
   conversation_id: string;
   phone_number: string;
@@ -40,5 +66,30 @@ export interface ConversationsResponse {
   success: boolean;
   data: {
     conversations: ConversationSummary[];
+  };
+}
+
+export interface ProfileResponse {
+  success: boolean;
+  data: User;
+}
+
+export interface CompanyResponse {
+  success: boolean;
+  data: CompanyFull;
+}
+
+export interface ApiKeysResponse {
+  success: boolean;
+  data: ApiKey[];
+}
+
+export interface CreateApiKeyResponse {
+  success: boolean;
+  data: {
+    id: string;
+    key: string;
+    label: string | null;
+    created_at: string;
   };
 }
