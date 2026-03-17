@@ -708,9 +708,9 @@ npx shadcn@latest add button card input label table
 
 - [ ] **Step 6: Create .env and .env.example**
 
-Create `.env`:
+Create `.env` with values from your Supabase project:
 ```
-VITE_SUPABASE_URL=https://jhkioefdrvbuxatbfhqi.supabase.co
+VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
 VITE_API_URL=http://localhost:3000
 ```
