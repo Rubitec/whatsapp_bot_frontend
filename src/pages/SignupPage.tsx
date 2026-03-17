@@ -1,18 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export function LoginPage() {
+export function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useAuth();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -20,10 +19,11 @@ export function LoginPage() {
     setLoading(true);
 
     try {
-      await signIn(email, password);
-      navigate('/', { replace: true });
+      const { error } = await supabase.auth.signUp({ email, password });
+      if (error) throw error;
+      navigate('/onboarding', { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : 'Signup failed');
     } finally {
       setLoading(false);
     }
@@ -33,7 +33,7 @@ export function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">WhatsApp Logger</CardTitle>
+          <CardTitle className="text-2xl text-center">Create Account</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -54,6 +54,7 @@ export function LoginPage() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
                 required
               />
             </div>
@@ -61,12 +62,12 @@ export function LoginPage() {
               <p className="text-sm text-destructive">{error}</p>
             )}
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? 'Creating account...' : 'Sign up'}
             </Button>
           </form>
           <p className="text-sm text-center text-muted-foreground mt-4">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
+            Already have an account?{' '}
+            <Link to="/login" className="text-primary hover:underline">Sign in</Link>
           </p>
         </CardContent>
       </Card>
