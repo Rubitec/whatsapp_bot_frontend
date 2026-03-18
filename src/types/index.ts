@@ -92,6 +92,18 @@ export interface ApiKeysResponse {
   data: ApiKey[];
 }
 
+export interface OverviewData {
+  total_conversations: number;
+  total_messages: number;
+  active_today: number;
+  recent_conversations: ConversationSummary[];
+}
+
+export interface OverviewResponse {
+  success: boolean;
+  data: OverviewData;
+}
+
 export interface CreateApiKeyResponse {
   success: boolean;
   data: {
