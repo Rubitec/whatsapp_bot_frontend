@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
-import { apiClient } from '@/lib/api';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -14,8 +15,15 @@ export function AuthGuard({ children }: AuthGuardProps) {
   useEffect(() => {
     if (loading || !session) return;
 
-    apiClient('/profile')
-      .then(() => setProfileStatus('complete'))
+    fetch(`${API_URL}/profile`, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    })
+      .then((res) => {
+        setProfileStatus(res.ok ? 'complete' : 'incomplete');
+      })
       .catch(() => setProfileStatus('incomplete'));
   }, [session, loading]);
 
