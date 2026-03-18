@@ -1,12 +1,9 @@
 import { useState, useMemo } from 'react';
-import { useAuth } from '@/hooks/use-auth';
 import { useConversations } from '@/hooks/use-conversations';
 import { ConversationList } from '@/components/ConversationList';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Search } from 'lucide-react';
 
 export function ConversationsPage() {
-  const { signOut } = useAuth();
   const { conversations, loading, error, refetch } = useConversations();
   const [search, setSearch] = useState('');
 
@@ -21,29 +18,62 @@ export function ConversationsPage() {
   }, [conversations, search]);
 
   return (
-    <div className="max-w-2xl mx-auto p-4">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Conversations</h1>
-        <Button variant="outline" size="sm" onClick={signOut}>
-          Sign out
-        </Button>
+    <div style={{ padding: 24 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 600, color: '#111827', marginBottom: 24 }}>
+        Conversations
+      </h1>
+
+      <div style={{ position: 'relative', maxWidth: 400, marginBottom: 16 }}>
+        <Search
+          style={{
+            position: 'absolute',
+            left: 12,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            width: 16,
+            height: 16,
+            color: '#9ca3af',
+          }}
+        />
+        <input
+          placeholder="Search by phone or name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: '100%',
+            paddingLeft: 40,
+            paddingRight: 16,
+            paddingTop: 10,
+            paddingBottom: 10,
+            fontSize: 14,
+            border: '1px solid #e5e7eb',
+            borderRadius: 8,
+            outline: 'none',
+            backgroundColor: '#ffffff',
+          }}
+        />
       </div>
 
-      <Input
-        placeholder="Search by phone or name..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        className="mb-4"
-      />
-
       {loading && (
-        <div className="text-center py-12 text-muted-foreground">Loading...</div>
+        <div style={{ textAlign: 'center', padding: '48px 0', color: '#9ca3af' }}>Loading...</div>
       )}
 
       {error && (
-        <div className="text-center py-12">
-          <p className="text-destructive mb-2">{error}</p>
-          <Button variant="outline" onClick={refetch}>Retry</Button>
+        <div style={{ textAlign: 'center', padding: '48px 0' }}>
+          <p style={{ color: '#ef4444', marginBottom: 8 }}>{error}</p>
+          <button
+            onClick={refetch}
+            style={{
+              fontSize: 14,
+              color: '#E8546C',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+            }}
+          >
+            Retry
+          </button>
         </div>
       )}
 

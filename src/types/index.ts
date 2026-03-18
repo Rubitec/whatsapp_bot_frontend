@@ -69,6 +69,14 @@ export interface ConversationsResponse {
   };
 }
 
+export interface MeResponse {
+  success: boolean;
+  data: {
+    user: User;
+    company: CompanyFull | null;
+  };
+}
+
 export interface ProfileResponse {
   success: boolean;
   data: User;

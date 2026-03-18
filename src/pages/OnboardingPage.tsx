@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 
 export function OnboardingPage() {
-  const { session, loading: authLoading } = useAuth();
+  const { authenticated, loading: authLoading, refetchMe } = useAuth();
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -23,6 +23,7 @@ export function OnboardingPage() {
         method: 'POST',
         body: JSON.stringify({ company_name: companyName, phone, address, tax_id: taxId }),
       });
+      await refetchMe();
       navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete setup');
@@ -39,7 +40,7 @@ export function OnboardingPage() {
     );
   }
 
-  if (!session) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />;
   }
 

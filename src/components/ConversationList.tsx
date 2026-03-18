@@ -35,7 +35,7 @@ export function ConversationList({ conversations }: ConversationListProps) {
         <Card
           key={conv.conversation_id}
           className="cursor-pointer hover:bg-accent transition-colors"
-          onClick={() => navigate(`/chat/${conv.conversation_id}`, {
+          onClick={() => navigate(`/conversations/${conv.conversation_id}`, {
             state: { phoneNumber: conv.phone_number, contactName: conv.contact_name },
           })}
         >

@@ -1,45 +1,26 @@
-import { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/use-auth';
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AuthGuardProps {
   children: React.ReactNode;
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { session, loading } = useAuth();
-  const [profileStatus, setProfileStatus] = useState<'loading' | 'complete' | 'incomplete'>('loading');
+  const { authenticated, user, company, loading } = useAuth();
 
-  useEffect(() => {
-    if (loading || !session) return;
-
-    fetch(`${API_URL}/profile`, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    })
-      .then((res) => {
-        setProfileStatus(res.ok ? 'complete' : 'incomplete');
-      })
-      .catch(() => setProfileStatus('incomplete'));
-  }, [session, loading]);
-
-  if (loading || (session && profileStatus === 'loading')) {
+  if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-muted-foreground">Loading...</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <p style={{ color: '#9ca3af' }}>Loading...</p>
       </div>
     );
   }
 
-  if (!session) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (profileStatus === 'incomplete') {
+  if (!user || !company) {
     return <Navigate to="/onboarding" replace />;
   }
 
