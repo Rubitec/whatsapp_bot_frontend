@@ -33,9 +33,9 @@ export function ConversationList({ conversations }: ConversationListProps) {
     <div className="space-y-2">
       {conversations.map((conv) => (
         <Card
-          key={conv.conversation_id}
+          key={conv.id}
           className="cursor-pointer hover:bg-accent transition-colors"
-          onClick={() => navigate(`/conversations/${conv.conversation_id}`, {
+          onClick={() => navigate(`/conversations/${conv.id}`, {
             state: { phoneNumber: conv.phone_number, contactName: conv.contact_name },
           })}
         >
@@ -54,7 +54,7 @@ export function ConversationList({ conversations }: ConversationListProps) {
                   <p className="text-xs text-muted-foreground">{conv.phone_number}</p>
                 )}
                 <p className="text-sm text-muted-foreground truncate">
-                  {conv.last_message_content || 'No messages yet'}
+                  {conv.last_message || 'No messages yet'}
                 </p>
                 <span className="text-xs bg-muted rounded-full px-2 py-0.5 ml-2 shrink-0">
                   {conv.total_messages}

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 export function LoginPage() {
@@ -7,7 +7,6 @@ export function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
   const { signIn } = useAuth();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -17,7 +16,6 @@ export function LoginPage() {
 
     try {
       await signIn(email, password);
-      navigate('/', { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed');
     } finally {

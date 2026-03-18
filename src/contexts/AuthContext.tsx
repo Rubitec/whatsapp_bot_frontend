@@ -1,13 +1,15 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { Session, AuthChangeEvent } from '@supabase/supabase-js';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { apiClient } from '@/lib/api';
 import type { User, CompanyFull, MeResponse } from '@/types';
 
 interface AuthContextType {
-  authenticated: boolean;
+  session: Session | null;
   user: User | null;
   company: CompanyFull | null;
-  loading: boolean;
+  isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   refetchMe: () => Promise<void>;
@@ -16,10 +18,11 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [authenticated, setAuthenticated] = useState(false);
+  const navigate = useNavigate();
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<CompanyFull | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchMe = useCallback(async () => {
     try {
@@ -33,46 +36,77 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    // Check for existing session on mount
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session) {
-        setAuthenticated(true);
-        await fetchMe();
-      }
-      setLoading(false);
-    });
+    const initializeSession = async (session: Session | null) => {
+      try {
+        if (session?.access_token) {
+          const { data: { user: authUser }, error } = await supabase.auth.getUser(session.access_token);
 
-    // Listen for auth changes (sign in, sign out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        setAuthenticated(true);
-        if (event === 'SIGNED_IN') {
+          if (error || !authUser || authUser.id !== session.user.id) {
+            setUser(null);
+            setSession(null);
+            await supabase.auth.signOut();
+            return;
+          }
+
           await fetchMe();
         }
-      } else {
-        setAuthenticated(false);
+      } catch (error) {
+        console.error('Session initialization error:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const handleSessionChange = async (event: AuthChangeEvent, session: Session | null) => {
+      setSession(session);
+
+      if (event === 'INITIAL_SESSION') {
+        initializeSession(session);
+      } else if (event === 'SIGNED_OUT') {
         setUser(null);
         setCompany(null);
+      } else if (event === 'TOKEN_REFRESHED') {
+        // Session refreshed — no action needed
+      } else if (event === 'USER_UPDATED') {
+        await fetchMe();
       }
-    });
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(handleSessionChange);
 
     return () => subscription.unsubscribe();
   }, [fetchMe]);
 
   const signIn = useCallback(async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) throw error;
-  }, []);
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      setSession(data.session);
+      await fetchMe();
+      navigate('/', { replace: true });
+    } catch (error) {
+      setUser(null);
+      setSession(null);
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchMe, navigate]);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-    setAuthenticated(false);
+    setSession(null);
     setUser(null);
     setCompany(null);
   }, []);
 
+  const refetchMe = useCallback(async () => {
+    await fetchMe();
+  }, [fetchMe]);
+
   return (
-    <AuthContext.Provider value={{ authenticated, user, company, loading, signIn, signOut, refetchMe: fetchMe }}>
+    <AuthContext.Provider value={{ session, user, company, isLoading, signIn, signOut, refetchMe }}>
       {children}
     </AuthContext.Provider>
   );

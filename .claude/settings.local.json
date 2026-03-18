@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(find /Users/mateorubinstein/Desktop/Rubitec/Projects/whatsapp_bot/whatsapp_bot_backend/src -type f \\\\\\(-name *.ts -o -name *.js \\\\\\))",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}

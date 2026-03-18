@@ -1,25 +1,20 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useConversations } from '@/hooks/use-conversations';
 import { Search } from 'lucide-react';
 
 export function ContactsPage() {
   const { conversations, loading } = useConversations();
   const [search, setSearch] = useState('');
+  const navigate = useNavigate();
 
   const contacts = useMemo(() => {
-    const list = conversations.map((c) => ({
-      phone: c.phone_number,
-      name: c.contact_name,
-      lastMessage: c.last_message_at,
-      totalMessages: c.total_messages,
-    }));
-
-    if (!search) return list;
+    if (!search) return conversations;
     const q = search.toLowerCase();
-    return list.filter(
+    return conversations.filter(
       (c) =>
-        c.phone.includes(q) ||
-        c.name?.toLowerCase().includes(q)
+        c.phone_number.includes(q) ||
+        c.contact_name?.toLowerCase().includes(q)
     );
   }, [conversations, search]);
 
@@ -102,18 +97,23 @@ export function ContactsPage() {
               ) : (
                 contacts.map((contact) => (
                   <tr
-                    key={contact.phone}
-                    style={{ borderBottom: '1px solid #f3f4f6' }}
+                    key={contact.id}
+                    onClick={() =>
+                      navigate(`/conversations/${contact.id}`, {
+                        state: { phoneNumber: contact.phone_number, contactName: contact.contact_name },
+                      })
+                    }
+                    style={{ borderBottom: '1px solid #f3f4f6', cursor: 'pointer' }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f9fafb')}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                   >
                     <td style={{ ...tdStyle, fontWeight: 500, color: '#111827' }}>
-                      {contact.name || <span style={{ color: '#9ca3af' }}>Unknown</span>}
+                      {contact.contact_name || <span style={{ color: '#9ca3af' }}>Unknown</span>}
                     </td>
-                    <td style={{ ...tdStyle, color: '#4b5563' }}>{contact.phone}</td>
-                    <td style={{ ...tdStyle, color: '#6b7280' }}>{formatDate(contact.lastMessage)}</td>
+                    <td style={{ ...tdStyle, color: '#4b5563' }}>{contact.phone_number}</td>
+                    <td style={{ ...tdStyle, color: '#6b7280' }}>{formatDate(contact.last_message_at)}</td>
                     <td style={{ ...tdStyle, color: '#4b5563', textAlign: 'right' }}>
-                      {contact.totalMessages}
+                      {contact.total_messages}
                     </td>
                   </tr>
                 ))

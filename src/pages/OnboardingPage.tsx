@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { apiClient } from '@/lib/api';
 
 export function OnboardingPage() {
-  const { authenticated, loading: authLoading, refetchMe } = useAuth();
+  const { session, isLoading: authLoading, refetchMe } = useAuth();
   const [companyName, setCompanyName] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
@@ -40,7 +40,7 @@ export function OnboardingPage() {
     );
   }
 
-  if (!authenticated) {
+  if (!session) {
     return <Navigate to="/login" replace />;
   }
 

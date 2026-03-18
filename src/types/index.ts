@@ -25,10 +25,10 @@ export interface ApiKey {
 }
 
 export interface ConversationSummary {
-  conversation_id: string;
+  id: string;
   phone_number: string;
   contact_name: string | null;
-  last_message_content: string | null;
+  last_message: string | null;
   last_message_at: string | null;
   total_messages: number;
 }

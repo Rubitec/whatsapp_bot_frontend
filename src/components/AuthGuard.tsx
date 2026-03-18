@@ -6,9 +6,9 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const { authenticated, user, company, loading } = useAuth();
+  const { session, user, company, isLoading } = useAuth();
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <p style={{ color: '#9ca3af' }}>Loading...</p>
@@ -16,7 +16,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
     );
   }
 
-  if (!authenticated) {
+  if (!session) {
     return <Navigate to="/login" replace />;
   }
 

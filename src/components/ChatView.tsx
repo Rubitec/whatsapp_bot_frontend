@@ -1,6 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { ChatBubble } from '@/components/ChatBubble';
-import { Button } from '@/components/ui/button';
 import type { Message } from '@/types';
 
 interface ChatViewProps {
@@ -11,23 +10,61 @@ interface ChatViewProps {
 }
 
 export function ChatView({ messages, hasMore, loadingMore, onLoadMore }: ChatViewProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
-  const initialLoad = useRef(true);
+  const isInitialLoad = useRef(true);
+  const prevMessageCount = useRef(0);
 
+  // Scroll to bottom on initial load
   useEffect(() => {
-    if (initialLoad.current && messages.length > 0) {
+    if (isInitialLoad.current && messages.length > 0) {
       bottomRef.current?.scrollIntoView();
-      initialLoad.current = false;
+      isInitialLoad.current = false;
+      prevMessageCount.current = messages.length;
     }
   }, [messages]);
 
+  // Preserve scroll position when older messages are prepended
+  useEffect(() => {
+    if (!isInitialLoad.current && messages.length > prevMessageCount.current) {
+      const container = containerRef.current;
+      if (container) {
+        const addedCount = messages.length - prevMessageCount.current;
+        // Find the element that was previously at the top and scroll to it
+        const children = container.children;
+        // Account for the loading indicator at position 0
+        const targetIndex = hasMore || loadingMore ? addedCount + 1 : addedCount;
+        if (children[targetIndex]) {
+          (children[targetIndex] as HTMLElement).scrollIntoView();
+        }
+      }
+      prevMessageCount.current = messages.length;
+    }
+  }, [messages, hasMore, loadingMore]);
+
+  // Scroll-to-top detection for loading older messages
+  const handleScroll = useCallback(() => {
+    const container = containerRef.current;
+    if (!container || loadingMore || !hasMore) return;
+
+    if (container.scrollTop < 100) {
+      onLoadMore();
+    }
+  }, [loadingMore, hasMore, onLoadMore]);
+
   return (
-    <div className="flex-1 overflow-y-auto p-4">
-      {hasMore && (
-        <div className="text-center mb-4">
-          <Button variant="outline" size="sm" onClick={onLoadMore} disabled={loadingMore}>
-            {loadingMore ? 'Loading...' : 'Load older messages'}
-          </Button>
+    <div
+      ref={containerRef}
+      onScroll={handleScroll}
+      style={{
+        flex: 1,
+        overflowY: 'auto',
+        padding: 16,
+      }}
+    >
+      {loadingMore && (
+        <div style={{ textAlign: 'center', padding: '8px 0', color: '#9ca3af', fontSize: 13 }}>
+          Loading older messages...
         </div>
       )}
 

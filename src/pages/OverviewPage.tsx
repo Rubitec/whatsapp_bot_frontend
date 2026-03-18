@@ -44,33 +44,43 @@ export function OverviewPage() {
   const { conversations, loading } = useConversations();
   const navigate = useNavigate();
 
+  const now = new Date();
+  const currentMonthLabel = now.toLocaleDateString([], { month: 'long', year: 'numeric' });
+
+  const monthlyConversations = useMemo(() => {
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    return conversations.filter(
+      (c) => c.last_message_at && new Date(c.last_message_at) >= monthStart
+    );
+  }, [conversations]);
+
   const stats = useMemo(() => {
-    const totalConversations = conversations.length;
-    const totalMessages = conversations.reduce((sum, c) => sum + c.total_messages, 0);
+    const totalConversations = monthlyConversations.length;
+    const totalMessages = monthlyConversations.reduce((sum, c) => sum + c.total_messages, 0);
 
     const today = new Date().toDateString();
-    const messagesToday = conversations.filter(
+    const activeToday = monthlyConversations.filter(
       (c) => c.last_message_at && new Date(c.last_message_at).toDateString() === today
     ).length;
 
-    return { totalConversations, totalMessages, messagesToday };
-  }, [conversations]);
+    return { totalConversations, totalMessages, activeToday };
+  }, [monthlyConversations]);
 
   const recentConversations = useMemo(() => {
-    return [...conversations]
+    return [...monthlyConversations]
       .sort((a, b) => {
         const dateA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
         const dateB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
         return dateB - dateA;
       })
       .slice(0, 5);
-  }, [conversations]);
+  }, [monthlyConversations]);
 
   function formatTime(dateStr: string | null): string {
     if (!dateStr) return '';
     const date = new Date(dateStr);
-    const now = new Date();
-    if (date.toDateString() === now.toDateString()) {
+    const today = new Date();
+    if (date.toDateString() === today.toDateString()) {
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
     return date.toLocaleDateString([], { month: 'short', day: 'numeric' });
@@ -89,9 +99,10 @@ export function OverviewPage() {
 
   return (
     <div style={{ padding: 24 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 600, color: '#111827', marginBottom: 24 }}>
-        Overview
-      </h1>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: 24 }}>
+        <h1 style={{ fontSize: 24, fontWeight: 600, color: '#111827' }}>Overview</h1>
+        <span style={{ fontSize: 14, color: '#6b7280' }}>{currentMonthLabel}</span>
+      </div>
 
       {/* Stats cards */}
       <div
@@ -105,20 +116,20 @@ export function OverviewPage() {
         <StatCard
           icon={<MessageSquare style={{ width: 20, height: 20, color: '#2563eb' }} />}
           iconBg="#eff6ff"
-          label="Total Conversations"
+          label="Conversations"
           value={stats.totalConversations}
         />
         <StatCard
           icon={<TrendingUp style={{ width: 20, height: 20, color: '#16a34a' }} />}
           iconBg="#f0fdf4"
-          label="Total Messages"
+          label="Messages"
           value={stats.totalMessages.toLocaleString()}
         />
         <StatCard
           icon={<Users style={{ width: 20, height: 20, color: '#9333ea' }} />}
           iconBg="#faf5ff"
           label="Active Today"
-          value={stats.messagesToday}
+          value={stats.activeToday}
         />
       </div>
 
@@ -150,15 +161,15 @@ export function OverviewPage() {
               fontSize: 14,
             }}
           >
-            No conversations yet
+            No conversations this month
           </div>
         ) : (
           <div>
             {recentConversations.map((conv, i) => (
               <button
-                key={conv.conversation_id}
+                key={conv.id}
                 onClick={() =>
-                  navigate(`/conversations/${conv.conversation_id}`, {
+                  navigate(`/conversations/${conv.id}`, {
                     state: { phoneNumber: conv.phone_number, contactName: conv.contact_name },
                   })
                 }
@@ -201,7 +212,7 @@ export function OverviewPage() {
                       marginTop: 2,
                     }}
                   >
-                    {conv.last_message_content || 'No messages'}
+                    {conv.last_message || 'No messages'}
                   </p>
                 </div>
                 <div style={{ marginLeft: 16, textAlign: 'right', flexShrink: 0 }}>
