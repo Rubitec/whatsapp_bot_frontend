@@ -13,6 +13,7 @@ import { SettingsLayout } from '@/pages/settings/SettingsLayout';
 import { CompanySettingsPage } from '@/pages/settings/CompanySettingsPage';
 import { ApiKeysPage } from '@/pages/settings/ApiKeysPage';
 import { ProfileSettingsPage } from '@/pages/settings/ProfileSettingsPage';
+import { TeamPage } from '@/pages/settings/TeamPage';
 
 export default function App() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             <Route path="contacts" element={<ContactsPage />} />
             <Route path="settings" element={<SettingsLayout />}>
               <Route index element={<CompanySettingsPage />} />
+              <Route path="team" element={<TeamPage />} />
               <Route path="api-keys" element={<ApiKeysPage />} />
               <Route path="profile" element={<ProfileSettingsPage />} />
             </Route>

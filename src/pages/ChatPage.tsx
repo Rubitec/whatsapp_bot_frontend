@@ -54,17 +54,33 @@ export function ChatPage() {
       </div>
 
       {/* Messages */}
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }`}</style>
       {loading && (
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#9ca3af',
-          }}
-        >
-          Loading...
+        <div style={{ flex: 1, overflowY: 'hidden', padding: 16 }}>
+          {[...Array(8)].map((_, i) => {
+            const isOutbound = i % 3 !== 0;
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  justifyContent: isOutbound ? 'flex-end' : 'flex-start',
+                  marginBottom: 12,
+                }}
+              >
+                <div
+                  style={{
+                    width: [180, 240, 160, 220, 200, 260, 140, 190][i],
+                    height: i === 2 || i === 5 ? 48 : 36,
+                    borderRadius: 12,
+                    backgroundColor: isOutbound ? '#f0e6e8' : '#f3f4f6',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                    animationDelay: `${i * 0.1}s`,
+                  }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 

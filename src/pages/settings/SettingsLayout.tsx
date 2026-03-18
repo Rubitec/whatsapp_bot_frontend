@@ -2,6 +2,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 const tabs = [
   { to: '/settings', label: 'Company', end: true },
+  { to: '/settings/team', label: 'Team' },
   { to: '/settings/api-keys', label: 'API Keys' },
   { to: '/settings/profile', label: 'Profile' },
 ];
