@@ -7,8 +7,17 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session) {
+        // Verify session is still valid server-side
+        const { error } = await supabase.auth.getUser(session.access_token);
+        if (error) {
+          await supabase.auth.signOut();
+          setSession(null);
+        } else {
+          setSession(session);
+        }
+      }
       setLoading(false);
     });
 

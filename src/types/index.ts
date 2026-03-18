@@ -10,9 +10,9 @@ export interface CompanyFull {
   id: string;
   name: string;
   slug: string;
-  plan: 'free' | 'pro' | 'enterprise';
-  phone_number: string | null;
-  company_number: string | null;
+  phone: string | null;
+  address: string | null;
+  tax_id: string | null;
   created_at: string;
 }
 

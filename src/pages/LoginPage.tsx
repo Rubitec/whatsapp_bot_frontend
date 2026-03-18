@@ -1,10 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -30,46 +26,57 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">WhatsApp Logger</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-            </div>
-            {error && (
-              <p className="text-sm text-destructive">{error}</p>
-            )}
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing in...' : 'Sign in'}
-            </Button>
-          </form>
-          <p className="text-sm text-center text-muted-foreground mt-4">
-            Don't have an account?{' '}
-            <Link to="/signup" className="text-primary hover:underline">Sign up</Link>
-          </p>
-        </CardContent>
-      </Card>
+    <div className="min-h-screen bg-white">
+      <div className="px-8 py-6">
+        <span className="text-xl font-semibold tracking-tight text-[#E8546C]">
+          boundbird
+        </span>
+      </div>
+
+      <div className="flex flex-col items-center px-4 pt-12">
+        <h1 className="text-3xl font-light text-gray-800 text-center leading-snug">
+          Sign in to your<br />BoundBird account
+        </h1>
+        <div className="w-8 h-0.5 bg-[#E8546C] mt-4 mb-10" />
+
+        <form onSubmit={handleSubmit} className="w-full max-w-md space-y-4">
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full px-4 py-4 text-base border border-gray-200 rounded-lg outline-none focus:border-[#E8546C] transition-colors placeholder:text-gray-400"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full px-4 py-4 text-base border border-gray-200 rounded-lg outline-none focus:border-[#E8546C] transition-colors placeholder:text-gray-400"
+          />
+
+          {error && (
+            <p className="text-sm text-red-500">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-4 text-base font-medium text-white bg-[#E8546C] rounded-full hover:bg-[#d94a61] transition-colors disabled:opacity-60"
+          >
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
+        </form>
+
+        <p className="text-sm text-gray-500 mt-6">
+          Don't have an account?{' '}
+          <Link to="/signup" className="text-[#E8546C] hover:underline">
+            Sign up
+          </Link>
+        </p>
+      </div>
     </div>
   );
 }
